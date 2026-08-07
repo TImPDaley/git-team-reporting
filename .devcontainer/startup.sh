@@ -23,7 +23,7 @@ else
 fi
 
 # Navigate to Rails app directory
-cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git_team_reporting}"
+cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git-team-reporting}"
 
 # Prepare database (creates if needed, runs migrations)
 echo "🗄️  Preparing database..."

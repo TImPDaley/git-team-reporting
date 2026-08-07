@@ -44,7 +44,7 @@ gem "image_processing", "~> 2.0"
 gem "ruby-vips", ">= 2.2.1"
 
 # GitHub Enterprise REST API client
-gem "octokit", "~> 9.0"
+gem "octokit", "~> 10.0"
 gem "faraday-retry"
 
 group :development, :test do

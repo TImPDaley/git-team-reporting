@@ -85,5 +85,5 @@ end
 
 # Report export formats (issue #4)
 gem "csv", "~> 3.3" # stdlib gem required on Ruby 3.4+
-gem "prawn", "~> 2.4"
+gem "prawn", "~> 2.5"
 gem "prawn-table", "~> 0.2"

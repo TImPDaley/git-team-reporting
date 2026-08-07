@@ -41,7 +41,7 @@ sudo -u postgres psql -c "ALTER USER vscode WITH PASSWORD 'dev';" 2>/dev/null ||
 echo "✅ Database user configured"
 
 # Navigate to Rails app directory
-cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git_team_reporting}"
+cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git-team-reporting}"
 
 # Install GitHub CLI (gh) so we can use `gh auth setup-git` for reliable
 # HTTPS authentication on this private repo (avoids "could not read Username"
@@ -148,8 +148,23 @@ fi
 
 # Install Ruby dependencies
 echo "💎 Installing Ruby gems..."
-gem install bundler --no-document
+
+# Prefer the Bundler version recorded in the lockfile if present
+if [ -f Gemfile.lock ]; then
+  BUNDLER_VERSION=$(grep -A1 "BUNDLED WITH" Gemfile.lock | tail -n1 | tr -d ' ')
+  if [ -n "$BUNDLER_VERSION" ]; then
+    echo "📌 Installing Bundler $BUNDLER_VERSION (from Gemfile.lock)"
+    gem install bundler -v "$BUNDLER_VERSION" --no-document
+  else
+    gem install bundler --no-document
+  fi
+else
+  gem install bundler --no-document
+fi
+
 bundle config set path 'vendor/bundle'
+# Clear any stale lock before installing
+rm -f vendor/bundle/ruby/*/bundler.lock 2>/dev/null || true
 bundle install
 echo "✅ Gems installed"
 

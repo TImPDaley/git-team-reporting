@@ -41,7 +41,7 @@ nohup /usr/local/bin/postgres-watchdog > /tmp/postgres-watchdog.log 2>&1 &
 echo "✅ Watchdog started"
 
 # Navigate to Rails app directory
-cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git_team_reporting}"
+cd "${CONTAINER_WORKSPACE_FOLDER:-/workspaces/git-team-reporting}"
 
 # Ruby LSP uses a composed Gemfile under .ruby-lsp/ only when ruby-lsp is NOT in the
 # project Gemfile. If both exist, eval_gemfile + duplicate gem lines make Bundler fail.

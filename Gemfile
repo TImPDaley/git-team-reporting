@@ -44,7 +44,7 @@ gem "image_processing", "~> 2.0"
 gem "ruby-vips", ">= 2.2.1"
 
 # GitHub Enterprise REST API client
-gem "octokit", "~> 9.0"
+gem "octokit", "~> 10.0"
 gem "faraday-retry"
 
 group :development, :test do
@@ -85,5 +85,5 @@ end
 
 # Report export formats (issue #4)
 gem "csv", "~> 3.3" # stdlib gem required on Ruby 3.4+
-gem "prawn", "~> 2.4"
+gem "prawn", "~> 2.5"
 gem "prawn-table", "~> 0.2"

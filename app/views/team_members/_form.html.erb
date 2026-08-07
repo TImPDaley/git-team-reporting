@@ -1,0 +1,33 @@
+<%= form_with model: [team, team_member], class: "card max-w-xl space-y-5 p-6" do |f| %>
+  <% if team_member.errors.any? %>
+    <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+      <p class="font-medium"><%= pluralize(team_member.errors.count, "error") %> prevented saving:</p>
+      <ul class="mt-2 list-disc pl-5">
+        <% team_member.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name, class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :name, required: true, class: "field-input" %>
+  </div>
+
+  <div>
+    <%= f.label :email, class: "block text-sm font-medium text-slate-700" %>
+    <%= f.email_field :email, required: true, class: "field-input" %>
+  </div>
+
+  <div>
+    <%= f.label :github_username, "GitHub username", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :github_username, placeholder: "optional", class: "field-input font-mono" %>
+    <p class="mt-1.5 text-xs text-slate-500">Used to match commits, PRs, reviews, and issues. Leading @ is stripped.</p>
+  </div>
+
+  <div class="flex flex-wrap gap-3 pt-1">
+    <%= f.submit class: button_classes(:primary) %>
+    <%= link_to "Cancel", team_path(team), class: button_classes(:secondary) %>
+  </div>
+<% end %>

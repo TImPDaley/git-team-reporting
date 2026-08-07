@@ -1,0 +1,26 @@
+<% content_for :title, @repository.full_name %>
+
+<div class="mb-6 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <p class="text-sm text-slate-500">
+      <%= link_to "Repositories", repositories_path, class: "hover:underline" %>
+      <span class="mx-1 text-slate-300">/</span>
+    </p>
+    <h1 class="page-title mt-1 font-mono"><%= @repository.full_name %></h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Team:
+      <%= link_to @repository.team.name, @repository.team, class: "font-medium text-slate-900 hover:underline" %>
+    </p>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Generate report", new_report_path(repository_id: @repository.id), class: button_classes(:primary) %>
+    <%= link_to "Edit", edit_repository_path(@repository), class: button_classes(:secondary) %>
+    <%= button_to "Delete", @repository, method: :delete,
+          form: { data: { turbo_confirm: "Delete this repository record?" } },
+          class: button_classes(:danger) %>
+  </div>
+</div>
+
+<div class="card max-w-lg p-6 text-sm text-slate-600">
+  <p>Reports for this repository will match GitHub activity against members of <strong class="text-slate-900"><%= @repository.team.name %></strong>.</p>
+</div>

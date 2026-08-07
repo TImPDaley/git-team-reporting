@@ -1,0 +1,16 @@
+{
+  "remote.autoForwardPorts": true,
+  "remote.portsAttributes": {
+    "3000": {
+      "label": "Rails Server",
+      "onAutoForward": "silent"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "ignore"
+    }
+  },
+  "remote.otherPortsAttributes": {
+    "onAutoForward": "silent"
+  }
+}

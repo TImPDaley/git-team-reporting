@@ -1,0 +1,7 @@
+<% content_for :title, "Edit #{@repository.full_name}" %>
+
+<div class="mb-6">
+  <h1 class="page-title">Edit repository</h1>
+  <p class="page-subtitle font-mono"><%= @repository.full_name %></p>
+</div>
+<%= render "form", repository: @repository %>

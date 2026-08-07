@@ -1,0 +1,11 @@
+<% content_for :title, "Add member · #{@team.name}" %>
+
+<p class="text-sm text-slate-500">
+  <%= link_to @team.name, @team, class: "hover:underline" %>
+  <span class="mx-1 text-slate-300">/</span>
+</p>
+<div class="mb-6 mt-1">
+  <h1 class="page-title">Add team member</h1>
+  <p class="page-subtitle">Name, email, and GitHub username for activity matching.</p>
+</div>
+<%= render "form", team: @team, team_member: @team_member %>

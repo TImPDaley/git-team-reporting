@@ -1,0 +1,24 @@
+<% content_for :title, @team_member.name %>
+
+<p class="text-sm text-slate-500">
+  <%= link_to @team.name, @team, class: "hover:underline" %>
+  <span class="mx-1 text-slate-300">/</span>
+</p>
+<h1 class="page-title mt-1"><%= @team_member.name %></h1>
+
+<dl class="card mt-6 max-w-lg space-y-4 p-6 text-sm">
+  <div>
+    <dt class="text-slate-500">Email</dt>
+    <dd class="mt-0.5 font-mono font-medium"><%= @team_member.email %></dd>
+  </div>
+  <div>
+    <dt class="text-slate-500">GitHub username</dt>
+    <dd class="mt-0.5 font-medium">
+      <%= @team_member.github_username.present? ? "@#{@team_member.github_username}" : "—" %>
+    </dd>
+  </div>
+</dl>
+
+<div class="mt-4">
+  <%= link_to "Edit", edit_team_team_member_path(@team, @team_member), class: button_classes(:secondary) %>
+</div>

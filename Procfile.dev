@@ -1,0 +1,4 @@
+# Bind 0.0.0.0 so port-forward / Codespaces / host browser can reach the app.
+# Plain `bin/rails server` only listens on 127.0.0.1, which often looks like an infinite spin.
+web: bin/rails server -b 0.0.0.0 -p ${PORT:-3000}
+css: bin/rails tailwindcss:watch

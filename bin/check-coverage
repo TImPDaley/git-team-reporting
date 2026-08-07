@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+
+path = "coverage/.last_run.json"
+unless File.exist?(path)
+  warn "No coverage report at #{path} — run tests with SimpleCov first"
+  exit 0
+end
+
+last_run = JSON.parse(File.read(path))
+overall_coverage = last_run.dig("result", "line") || last_run.dig("result", "covered_percent")
+
+MINIMUM_COVERAGE = 85.0
+
+puts "\n=== Coverage Report ==="
+
+if overall_coverage.nil?
+  warn "Could not parse coverage from #{path}"
+  exit 1
+end
+
+if overall_coverage < MINIMUM_COVERAGE
+  puts "❌ Overall coverage #{overall_coverage.round(2)}% is below #{MINIMUM_COVERAGE}% minimum"
+  exit 1
+end
+
+puts "✅ Overall coverage: #{overall_coverage.round(2)}%"
+puts "\n✅ Coverage check passed!"

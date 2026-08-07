@@ -1,0 +1,106 @@
+{
+    "name": "Git Team Reporting Rails Dev Container",
+    "build": {
+        "context": ".",
+        "dockerfile": "Dockerfile",
+        "args": {
+            "RUBY_VERSION": "3.4.9",
+            "RAILS_VERSION": "8.1.3"
+        }
+    },
+    // Features for additional functionality
+    "features": {
+        "ghcr.io/devcontainers/features/common-utils:2": {
+            "installZsh": false,
+            "installOhMyZsh": false,
+            "upgradePackages": false
+        },
+        // GitHub CLI for reliable git auth (gh auth setup-git) on private repos.
+        // Avoids "could not read Username for 'https://github.com'" + terminal prompts disabled.
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+    // Use the vscode user provided by the devcontainers base image
+    "remoteUser": "vscode",
+    // Ensure host credential / state paths exist so bind mounts never fail.
+    // HOME-only for both initializeCommand and mounts (must stay in sync).
+    // initializeCommand runs on the host and requires a POSIX shell
+    // (Linux/macOS/Codespaces, or WSL recommended on Windows — not raw cmd/PowerShell).
+    "initializeCommand": "bash ${localWorkspaceFolder}/.devcontainer/initialize.sh",
+    // Share host credentials / durable state with the container (never commit secrets).
+    // ~/.grok-devcontainer   → full Grok home (bin, auth, config, sessions) — directory mount
+    // ~/.config/gh           → GitHub CLI auth (gh auth login) + prefs
+    //
+    // Grok MUST use a directory mount (not per-file mounts of auth.json / config.toml).
+    // The installer and login atomically rename temp files onto those paths; Linux rejects
+    // rename-over-file-mount with "Device or resource busy", which broke Grok after every rebuild.
+    // Host path is ~/.grok-devcontainer (not ~/.grok) so a native host Grok install stays separate.
+    "mounts": [
+        "source=${localEnv:HOME}/.grok-devcontainer,target=/home/vscode/.grok,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.config/gh,target=/home/vscode/.config/gh,type=bind,consistency=cached"
+    ],
+    // Forward Rails & (optional) Postgres ports
+    "forwardPorts": [
+        3000,
+        5432
+    ],
+    "portsAttributes": {
+        "3000": {
+            "label": "Rails Server",
+            // NEVER use openBrowser here. Every puma restart / port re-forward opens
+            // a NEW browser tab (10+ tabs is a common symptom during bin/dev).
+            // Open http://localhost:3000 yourself once.
+            "onAutoForward": "silent"
+        },
+        "5432": {
+            "label": "PostgreSQL",
+            "onAutoForward": "ignore"
+        }
+    },
+    "containerEnv": {
+        "RAILS_ENV": "development",
+        "DATABASE_URL": "postgresql://vscode:dev@localhost:5432/",
+        // Grok state dir (matches the directory mount). Do not repoint HOME for Grok.
+        "GROK_HOME": "/home/vscode/.grok"
+    },
+    "remoteEnv": {
+        "GROK_HOME": "/home/vscode/.grok"
+    },
+    // Run after the container is built (single-shot)
+    "postCreateCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-create.sh",
+    // Runs every time the container starts
+    "postStartCommand": "bash ${containerWorkspaceFolder}/.devcontainer/post-start.sh",
+    // Quality-of-life in VS Code
+    // Grok Build (the xAI TUI/agent) is installed via post-create.sh so it runs with correct container context.
+    // Launch with `grok` in the integrated terminal (Ctrl+` or Cmd+`).
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "Shopify.ruby-lsp",
+                "bung87.vscode-gemfile",
+                "ms-azuretools.vscode-docker",
+                "GitHub.copilot",
+                "EditorConfig.EditorConfig"
+            ],
+            "settings": {
+                "editor.formatOnSave": true,
+                "files.eol": "\n",
+                "rubyLsp.enabled": true,
+                "rubyLsp.rubyVersionManager": {
+                    "identifier": "rbenv"
+                },
+                "terminal.integrated.defaultProfile.linux": "bash",
+                "terminal.integrated.env.linux": {
+                    "COLORTERM": "truecolor",
+                    "LANG": "en_US.UTF-8",
+                    "LC_ALL": "en_US.UTF-8",
+                    "GROK_HOME": "/home/vscode/.grok"
+                },
+                "terminal.integrated.shellIntegration.enabled": false,
+                "terminal.integrated.localEchoEnabled": "off",
+                "terminal.integrated.gpuAcceleration": "off",
+                "terminal.integrated.fontFamily": "JetBrains Mono, DejaVu Sans Mono, Liberation Mono, monospace",
+                "terminal.integrated.scrollback": 10000
+            }
+        }
+    }
+}

@@ -1,0 +1,101 @@
+<% content_for :title, "Home · Git Team Reporting" %>
+
+<section class="space-y-8">
+  <div class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10">
+    <div class="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-slate-100"></div>
+    <div class="pointer-events-none absolute -bottom-20 right-24 h-40 w-40 rounded-full bg-indigo-50"></div>
+    <div class="relative">
+      <p class="text-xs font-semibold uppercase tracking-wider text-indigo-600">Local reporting workspace</p>
+      <h1 class="mt-2 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">Git Team Reporting</h1>
+      <p class="mt-3 max-w-2xl text-base leading-relaxed text-slate-600">
+        Generate developer activity reports from GitHub Enterprise repositories.
+        Manage teams and members, associate repositories, then produce a clear HTML report for any date range.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <%= link_to "Generate Report", new_report_path, class: button_classes(:primary) %>
+        <%= link_to "Saved Reports", reports_path, class: button_classes(:secondary) %>
+        <%= link_to "Manage Teams", teams_path, class: button_classes(:secondary) %>
+        <%= link_to "Settings / Token", settings_path, class: button_classes(:secondary) %>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-500">Teams</p>
+        <span class="badge badge-slate">CRUD</span>
+      </div>
+      <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900"><%= @teams_count %></p>
+      <p class="mt-1 text-xs text-slate-500"><%= link_to "View teams →", teams_path, class: "hover:text-slate-800 hover:underline" %></p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-500">Team members</p>
+        <span class="badge badge-slate">Matched by login/email</span>
+      </div>
+      <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900"><%= @members_count %></p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-500">Repositories</p>
+        <span class="badge badge-slate">1 team each</span>
+      </div>
+      <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900"><%= @repositories_count %></p>
+      <p class="mt-1 text-xs text-slate-500"><%= link_to "View repositories →", repositories_path, class: "hover:text-slate-800 hover:underline" %></p>
+    </div>
+    <div class="card p-5">
+      <div class="flex items-center justify-between">
+        <p class="text-sm font-medium text-slate-500">Saved reports</p>
+        <span class="badge badge-slate">History</span>
+      </div>
+      <p class="mt-2 text-3xl font-semibold tracking-tight text-slate-900"><%= @reports_count %></p>
+      <p class="mt-1 text-xs text-slate-500"><%= link_to "Browse reports →", reports_path, class: "hover:text-slate-800 hover:underline" %></p>
+    </div>
+  </div>
+
+  <% if @recent_reports.any? %>
+    <section class="card overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 px-5 py-3">
+        <h2 class="text-sm font-semibold text-slate-900">Recent reports</h2>
+        <%= link_to "View all", reports_path, class: "text-xs font-medium text-slate-600 hover:underline" %>
+      </div>
+      <ul class="divide-y divide-slate-100">
+        <% @recent_reports.each do |report| %>
+          <li class="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-sm">
+            <div>
+              <%= link_to report.repository_full_name, report_path(report), class: "font-mono font-medium hover:underline" %>
+              <p class="text-xs text-slate-500">
+                <%= report.team_name %> · <%= report.start_date %> – <%= report.end_date %> · <%= report.format_label %>
+              </p>
+            </div>
+            <span class="text-xs text-slate-500"><%= time_ago_in_words(report.generated_at) %> ago</span>
+          </li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
+
+  <% if github_token_status.present? %>
+    <div class="card border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-950">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge badge-emerald">Token ready</span>
+        <p class="font-medium">Configured via <strong><%= github_token_status.source %></strong></p>
+      </div>
+      <p class="mt-2 text-emerald-900/80">This app never stores the token in the database. Session overrides live in the encrypted browser session cookie only.</p>
+    </div>
+  <% else %>
+    <div class="card border-amber-200 bg-amber-50 p-5 text-sm text-amber-950">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="badge badge-amber">Action needed</span>
+        <p class="font-medium">No GitHub token configured</p>
+      </div>
+      <p class="mt-2 text-amber-900/90">
+        Set <code class="rounded-md border border-amber-200 bg-white px-1.5 py-0.5 font-mono text-xs">GITHUB_TOKEN</code>
+        (or <code class="rounded-md border border-amber-200 bg-white px-1.5 py-0.5 font-mono text-xs">GITHUB_ENTERPRISE_TOKEN</code>),
+        or add a session override in <%= link_to "Settings", settings_path, class: "font-semibold underline" %>.
+      </p>
+    </div>
+  <% end %>
+</section>

@@ -1,0 +1,64 @@
+<% content_for :title, "Reports · Git Team Reporting" %>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="page-title">Reports</h1>
+    <p class="page-subtitle">Saved report history — reopen older runs without calling GitHub again.</p>
+  </div>
+  <%= link_to "Generate report", new_report_path, class: button_classes(:primary) %>
+</div>
+
+<% if @reports.any? %>
+  <div class="card overflow-hidden">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Run date</th>
+          <th>Repository</th>
+          <th>Team</th>
+          <th>Date range</th>
+          <th>Format</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @reports.each do |report| %>
+          <tr>
+            <td class="whitespace-nowrap text-sm">
+              <div class="font-medium text-slate-900"><%= l(report.generated_at, format: :long) rescue report.generated_at %></div>
+              <div class="text-xs text-slate-500"><%= time_ago_in_words(report.generated_at) %> ago</div>
+            </td>
+            <td class="font-mono text-sm font-medium">
+              <%= link_to report.repository_full_name, report_path(report), class: "hover:underline" %>
+            </td>
+            <td class="text-sm"><%= report.team_name %></td>
+            <td class="text-sm text-slate-600">
+              <div><%= report.start_date %> – <%= report.end_date %></div>
+              <% if report.date_range_label.present? %>
+                <div class="text-xs text-slate-500"><%= report.date_range_label %></div>
+              <% end %>
+            </td>
+            <td>
+              <span class="badge badge-slate"><%= report.format_label %></span>
+            </td>
+            <td class="space-x-3 text-right text-sm">
+              <%= link_to "View", report_path(report), class: "font-medium text-slate-700 hover:text-slate-900" %>
+              <%= link_to "Download", download_report_path(report), class: "font-medium text-indigo-600 hover:text-indigo-800" %>
+              <%= button_to "Delete", report_path(report), method: :delete,
+                    form: { data: { turbo_confirm: "Delete this saved report?" }, class: "inline" },
+                    class: "font-medium text-rose-600 hover:text-rose-800" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card border-dashed p-12 text-center">
+    <p class="text-base font-medium text-slate-900">No saved reports yet</p>
+    <p class="mt-1 text-sm text-slate-500">Generate a report and it will appear here with its metadata and file for later viewing.</p>
+    <div class="mt-6">
+      <%= link_to "Generate your first report", new_report_path, class: button_classes(:primary) %>
+    </div>
+  </div>
+<% end %>

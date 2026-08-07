@@ -1,0 +1,87 @@
+<% content_for :title, "Report · #{@report["repository_full_name"]}" %>
+
+<p class="meta">Activity report</p>
+<h1><%= @report["repository_full_name"] %></h1>
+<p class="meta">
+  Team: <strong><%= @report["team_name"] %></strong>
+  · <%= @report["date_label"] %>
+  · Generated <%= @report["generated_at"] %>
+</p>
+
+<% totals = @report["repo_totals"] || {} %>
+<% team_totals = @report["team_totals"] || {} %>
+
+<div class="cards">
+  <div class="card"><div class="label">Unique contributors</div><div class="value"><%= @report["unique_contributors"] %></div></div>
+  <div class="card"><div class="label">Commits (repo)</div><div class="value"><%= totals["commits"] %></div></div>
+  <div class="card"><div class="label">PRs merged (repo)</div><div class="value"><%= totals["prs_merged"] %></div></div>
+  <div class="card"><div class="label">Avg PR cycle (hrs)</div><div class="value"><%= totals["average_pr_cycle_time_hours"] || "—" %></div></div>
+</div>
+
+<h2>Team totals (matched members only)</h2>
+<div class="cards">
+  <div class="card"><div class="label">Commits</div><div class="value"><%= team_totals["commits"] %></div></div>
+  <div class="card"><div class="label">PRs opened</div><div class="value"><%= team_totals["prs_opened"] %></div></div>
+  <div class="card"><div class="label">PRs merged</div><div class="value"><%= team_totals["prs_merged"] %></div></div>
+  <div class="card"><div class="label">Reviews</div><div class="value"><%= team_totals["reviews"] %></div></div>
+  <div class="card"><div class="label">Issues + / −</div><div class="value"><%= team_totals["issues_created"] %> / <%= team_totals["issues_closed"] %></div></div>
+  <div class="card"><div class="label">Lines + / −</div><div class="value"><%= team_totals["lines_added"] %> / <%= team_totals["lines_deleted"] %></div></div>
+</div>
+
+<h2>By developer</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Developer</th>
+      <th>Match</th>
+      <th>Commits</th>
+      <th>PRs open</th>
+      <th>PRs merged</th>
+      <th>PRs closed*</th>
+      <th>Reviews</th>
+      <th>Issues +/−</th>
+      <th>Lines +/−</th>
+      <th>Avg cycle (h)</th>
+      <th>Author / committer</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% Array(@report["developers"]).each do |dev| %>
+      <tr class="<%= dev["matched"] ? "" : "unmatched" %>">
+        <td><strong><%= dev["display_name"] %></strong></td>
+        <td>
+          <% if dev["matched"] %>
+            <span class="badge ok"><%= dev["matched_by"] %></span>
+          <% else %>
+            <span class="badge warn">unmatched</span>
+          <% end %>
+        </td>
+        <td><%= dev["commits"] %></td>
+        <td><%= dev["prs_opened"] %></td>
+        <td><%= dev["prs_merged"] %></td>
+        <td><%= dev["prs_closed_unmerged"] %></td>
+        <td><%= dev["reviews"] %></td>
+        <td><%= dev["issues_created"] %> / <%= dev["issues_closed"] %></td>
+        <td><%= dev["lines_added"] %> / <%= dev["lines_deleted"] %></td>
+        <td><%= dev["average_pr_cycle_time_hours"] || "—" %></td>
+        <td><%= dev["commits_as_author"] %> / <%= dev["commits_as_committer"] %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<p class="muted">* PRs closed without merge.</p>
+
+<% unmatched = Array(@report["unmatched"]) %>
+<% if unmatched.any? %>
+  <h2>Unmatched contributors</h2>
+  <ul class="unmatched-list">
+    <% unmatched.each do |dev| %>
+      <li>
+        <strong><%= dev["display_name"] %></strong>
+        — commits: <%= dev["commits"] %>,
+        PRs opened: <%= dev["prs_opened"] %>,
+        reviews: <%= dev["reviews"] %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>

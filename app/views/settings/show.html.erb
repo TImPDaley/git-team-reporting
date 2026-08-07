@@ -1,0 +1,125 @@
+<% content_for :title, "Settings · Git Team Reporting" %>
+
+<div class="mb-8">
+  <h1 class="page-title">Settings</h1>
+  <p class="page-subtitle max-w-2xl">
+    Configure how this local app connects to GitHub Enterprise for <strong>this browser session</strong>.
+    Overrides are stored in the encrypted Rails session (typically an encrypted cookie) — never written to the database.
+  </p>
+</div>
+
+<div class="mb-6 card p-5">
+  <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Active values</h2>
+  <dl class="mt-4 grid gap-4 sm:grid-cols-3 text-sm">
+    <div>
+      <dt class="text-xs text-slate-500">API endpoint</dt>
+      <dd class="mt-1 break-all font-mono text-xs text-slate-900"><%= @config.api_endpoint %></dd>
+      <dd class="mt-1"><span class="badge <%= @config.api_endpoint_source == :session ? "badge-emerald" : "badge-slate" %>"><%= @config.api_endpoint_source %></span></dd>
+    </div>
+    <div>
+      <dt class="text-xs text-slate-500">Default owner / org</dt>
+      <dd class="mt-1 font-medium text-slate-900"><%= @config.default_owner %></dd>
+      <dd class="mt-1"><span class="badge <%= @config.default_owner_source == :session ? "badge-emerald" : "badge-slate" %>"><%= @config.default_owner_source %></span></dd>
+    </div>
+    <div>
+      <dt class="text-xs text-slate-500">Token</dt>
+      <dd class="mt-1 font-medium text-slate-900">
+        <% if @config.token_present? %>
+          Present
+        <% else %>
+          Missing
+        <% end %>
+      </dd>
+      <dd class="mt-1">
+        <span class="badge <%= @config.token_source == :session ? "badge-emerald" : (@config.token_present? ? "badge-slate" : "badge-amber") %>">
+          <%= @config.token_source %>
+        </span>
+      </dd>
+    </div>
+  </dl>
+  <p class="mt-4 text-xs text-slate-500">
+    Environment defaults:
+    endpoint <code class="rounded bg-slate-100 px-1 font-mono"><%= @env_api_endpoint %></code>,
+    owner
+    <% if @env_default_owner.present? %>
+      <code class="rounded bg-slate-100 px-1 font-mono"><%= @env_default_owner %></code>
+    <% else %>
+      <span class="italic">(blank)</span>
+    <% end %>.
+  </p>
+</div>
+
+<div class="grid gap-6 lg:grid-cols-2">
+  <section class="card p-6">
+    <h2 class="text-lg font-semibold text-slate-900">Session connection overrides</h2>
+    <p class="mt-2 text-sm leading-relaxed text-slate-600">
+      Override the API base URL and default organization for this browser only.
+      Leave a field blank and save to fall back to the environment default.
+    </p>
+
+    <%= form_with url: settings_path, method: :patch, class: "mt-5 space-y-4" do |f| %>
+      <div>
+        <label for="settings_api_endpoint" class="block text-sm font-medium text-slate-700">API endpoint</label>
+        <input type="url" name="settings[api_endpoint]" id="settings_api_endpoint"
+               value="<%= @config.api_endpoint %>"
+               placeholder="<%= @env_api_endpoint %>"
+               class="field-input font-mono" required>
+        <p class="mt-1.5 text-xs text-slate-500">
+          This is the <strong>API base URL</strong>, not a repo page.
+          github.com → <code class="rounded bg-slate-100 px-1">https://api.github.com</code>;
+          GitHub Enterprise Server → <code class="rounded bg-slate-100 px-1">https://your-host/api/v3</code>.
+          Env default: <code class="rounded bg-slate-100 px-1"><%= @env_api_endpoint %></code>.
+        </p>
+
+      </div>
+
+      <div>
+        <label for="settings_default_owner" class="block text-sm font-medium text-slate-700">Default owner / org</label>
+        <input type="text" name="settings[default_owner]" id="settings_default_owner"
+               value="<%= @config.default_owner %>"
+               placeholder="<%= @env_default_owner.presence || 'optional' %>"
+               class="field-input font-mono" autocomplete="organization">
+        <p class="mt-1.5 text-xs text-slate-500">
+          Prefills repository/report forms. Leave blank to clear any session override
+          (env default:
+          <% if @env_default_owner.present? %>
+            <code class="rounded bg-slate-100 px-1"><%= @env_default_owner %></code>
+          <% else %>
+            <span class="italic">blank</span>
+          <% end %>).
+        </p>
+      </div>
+
+      <div class="flex flex-wrap gap-3 pt-1">
+        <%= f.submit "Save connection overrides", class: button_classes(:primary) %>
+      </div>
+    <% end %>
+
+  </section>
+
+  <section class="card p-6">
+    <h2 class="text-lg font-semibold text-slate-900">Session token override</h2>
+    <p class="mt-2 text-sm leading-relaxed text-slate-600">
+      Optional. Prefer <code class="rounded bg-slate-100 px-1 font-mono text-xs">GITHUB_TOKEN</code> in the environment.
+      Leave blank to keep the current token (ENV or existing session value).
+    </p>
+
+    <%= form_with url: settings_path, method: :patch, class: "mt-5 space-y-4" do |f| %>
+      <div>
+        <label for="settings_github_pat" class="block text-sm font-medium text-slate-700">Personal access token</label>
+        <input type="password" name="settings[github_pat]" id="settings_github_pat" autocomplete="off"
+               class="field-input font-mono" placeholder="ghp_… or GHE token">
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <%= f.submit "Save token override", class: button_classes(:primary) %>
+      </div>
+    <% end %>
+
+    <% if @config.session_overrides? %>
+      <div class="mt-6 border-t border-slate-100 pt-4">
+        <p class="mb-3 text-xs text-slate-500">Clears API endpoint, default owner, and token session overrides.</p>
+        <%= button_to "Clear all session overrides", settings_path, method: :delete, class: button_classes(:danger) %>
+      </div>
+    <% end %>
+  </section>
+</div>

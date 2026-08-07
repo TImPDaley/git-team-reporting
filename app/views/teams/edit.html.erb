@@ -1,0 +1,7 @@
+<% content_for :title, "Edit #{@team.name}" %>
+
+<div class="mb-6">
+  <h1 class="page-title">Edit team</h1>
+  <p class="page-subtitle"><%= @team.name %></p>
+</div>
+<%= render "form", team: @team %>

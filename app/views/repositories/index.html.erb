@@ -1,0 +1,47 @@
+<% content_for :title, "Repositories · Git Team Reporting" %>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="page-title">Repositories</h1>
+    <p class="page-subtitle">Each repository is associated with one team.</p>
+  </div>
+  <%= link_to "New repository", new_repository_path, class: button_classes(:primary) %>
+</div>
+
+<% if @repositories.any? %>
+  <div class="card overflow-hidden">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Repository</th>
+          <th>Team</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @repositories.each do |repo| %>
+          <tr>
+            <td class="font-medium font-mono">
+              <%= link_to repo.full_name, repo, class: "hover:underline" %>
+            </td>
+            <td>
+              <%= link_to repo.team.name, repo.team, class: "text-slate-600 hover:underline" %>
+            </td>
+            <td class="space-x-3 text-right">
+              <%= link_to "Report", new_report_path(repository_id: repo.id), class: "text-sm font-medium text-indigo-600 hover:text-indigo-800" %>
+              <%= link_to "Edit", edit_repository_path(repo), class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card border-dashed p-12 text-center">
+    <p class="text-base font-medium text-slate-900">No repositories yet</p>
+    <p class="mt-1 text-sm text-slate-500">Link an owner/org and repo name to a team before generating reports.</p>
+    <div class="mt-6">
+      <%= link_to "Add one", new_repository_path, class: button_classes(:primary) %>
+    </div>
+  </div>
+<% end %>

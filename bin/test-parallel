@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Run RSpec: non-system specs in parallel, system specs sequentially.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+PROCESSES="${PARALLEL_TEST_PROCESSORS:-4}"
+
+echo "==> Preparing test database..."
+RAILS_ENV=test bin/rails db:test:prepare 2>/dev/null || RAILS_ENV=test bin/rails db:prepare
+
+# Create parallel DBs if parallel_tests is available
+if bundle show parallel_tests >/dev/null 2>&1; then
+  RAILS_ENV=test bundle exec rake parallel:create parallel:prepare 2>/dev/null || true
+fi
+
+echo "==> Running non-system specs in parallel (-n ${PROCESSES})..."
+if [ -d spec ] && find spec -name '*_spec.rb' ! -path 'spec/system/*' | grep -q .; then
+  if bundle show parallel_tests >/dev/null 2>&1; then
+    bundle exec parallel_rspec -n "$PROCESSES" \
+      -o '--format progress' \
+      --exclude-pattern 'spec/system/' \
+      spec/ || bundle exec rspec --exclude-pattern 'spec/system/**/*_spec.rb'
+  else
+    bundle exec rspec --exclude-pattern 'spec/system/**/*_spec.rb'
+  fi
+else
+  echo "    (no non-system specs yet)"
+fi
+
+if [ -d spec/system ] && find spec/system -name '*_spec.rb' 2>/dev/null | grep -q .; then
+  echo "==> Running system specs sequentially..."
+  NO_COVERAGE=1 bundle exec rspec spec/system/ --format progress
+else
+  echo "==> No system specs — skipping"
+fi
+
+echo "==> All tests finished"

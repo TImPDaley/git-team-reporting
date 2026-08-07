@@ -1,0 +1,89 @@
+<% content_for :title, "#{@team.name} · Teams" %>
+
+<div class="mb-8 flex flex-wrap items-start justify-between gap-4">
+  <div>
+    <p class="text-sm text-slate-500">
+      <%= link_to "Teams", teams_path, class: "hover:text-slate-800 hover:underline" %>
+      <span class="mx-1 text-slate-300">/</span>
+    </p>
+    <h1 class="page-title mt-1"><%= @team.name %></h1>
+    <% if @team.description.present? %>
+      <p class="mt-2 max-w-2xl text-slate-600"><%= @team.description %></p>
+    <% end %>
+  </div>
+  <div class="flex flex-wrap gap-2">
+    <%= link_to "Edit team", edit_team_path(@team), class: button_classes(:secondary) %>
+    <%= button_to "Delete team", @team, method: :delete,
+          form: { data: { turbo_confirm: "Delete this team?" } },
+          class: button_classes(:danger) %>
+  </div>
+</div>
+
+<section class="mb-10">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-lg font-semibold text-slate-900">Members</h2>
+    <%= link_to "Add member", new_team_team_member_path(@team), class: button_classes(:primary) %>
+  </div>
+
+  <% if @team_members.any? %>
+    <div class="card overflow-hidden">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>GitHub username</th>
+            <th class="text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @team_members.each do |member| %>
+            <tr>
+              <td class="font-medium"><%= member.name %></td>
+              <td class="font-mono text-xs text-slate-600"><%= member.email %></td>
+              <td>
+                <% if member.github_username.present? %>
+                  <span class="badge badge-slate font-mono">@<%= member.github_username %></span>
+                <% else %>
+                  <span class="text-slate-400">—</span>
+                <% end %>
+              </td>
+              <td class="space-x-3 text-right">
+                <%= link_to "Edit", edit_team_team_member_path(@team, member), class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+                <%= button_to "Remove", team_team_member_path(@team, member), method: :delete,
+                      form: { data: { turbo_confirm: "Remove this member?" }, class: "inline" },
+                      class: "text-sm font-medium text-rose-600 hover:text-rose-800" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="card border-dashed p-8 text-center text-sm text-slate-600">
+      No members yet. Add people with name, email, and GitHub username so reports can match activity.
+    </div>
+  <% end %>
+</section>
+
+<section>
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    <h2 class="text-lg font-semibold text-slate-900">Repositories</h2>
+    <%= link_to "Add repository", new_repository_path(team_id: @team.id), class: button_classes(:secondary) %>
+  </div>
+
+  <% if @repositories.any? %>
+    <ul class="card divide-y divide-slate-100 overflow-hidden">
+      <% @repositories.each do |repo| %>
+        <li class="flex flex-wrap items-center justify-between gap-3 px-4 py-3 text-sm">
+          <%= link_to repo.full_name, repo, class: "font-medium font-mono text-slate-900 hover:underline" %>
+          <%= link_to "Generate report", new_report_path(repository_id: repo.id), class: "text-sm font-medium text-indigo-600 hover:text-indigo-800" %>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <div class="card border-dashed p-8 text-center text-sm text-slate-600">
+      No repositories linked to this team.
+    </div>
+  <% end %>
+</section>

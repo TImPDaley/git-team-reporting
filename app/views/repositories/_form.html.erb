@@ -1,0 +1,41 @@
+<%= form_with model: repository, class: "card max-w-xl space-y-5 p-6" do |f| %>
+  <% if repository.errors.any? %>
+    <div class="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+      <p class="font-medium"><%= pluralize(repository.errors.count, "error") %> prevented saving:</p>
+      <ul class="mt-2 list-disc pl-5">
+        <% repository.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :owner, "Owner / organization", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :owner, required: true, class: "field-input font-mono" %>
+    <p class="mt-1.5 text-xs text-slate-500">
+      <% if github_default_owner.present? %>
+        Prefills from Settings / ENV: <code class="rounded bg-slate-100 px-1 font-mono"><%= github_default_owner %></code>
+      <% else %>
+        No default owner/org is set — enter the GitHub owner or organization.
+      <% end %>
+    </p>
+  </div>
+
+  <div>
+    <%= f.label :name, "Repository name", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.text_field :name, required: true, class: "field-input font-mono" %>
+  </div>
+
+  <div>
+    <%= f.label :team_id, "Team", class: "block text-sm font-medium text-slate-700" %>
+    <%= f.collection_select :team_id, Team.ordered, :id, :name,
+          { include_blank: "Select a team", selected: repository.team_id || params[:team_id] },
+          { required: true, class: "field-input" } %>
+  </div>
+
+  <div class="flex flex-wrap gap-3 pt-1">
+    <%= f.submit class: button_classes(:primary) %>
+    <%= link_to "Cancel", repository.persisted? ? repository_path(repository) : repositories_path, class: button_classes(:secondary) %>
+  </div>
+<% end %>

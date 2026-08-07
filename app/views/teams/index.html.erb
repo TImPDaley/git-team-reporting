@@ -1,0 +1,49 @@
+<% content_for :title, "Teams · Git Team Reporting" %>
+
+<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+  <div>
+    <h1 class="page-title">Teams</h1>
+    <p class="page-subtitle">Reusable teams and members for report matching.</p>
+  </div>
+  <%= link_to "New team", new_team_path, class: button_classes(:primary) %>
+</div>
+
+<% if @teams.any? %>
+  <div class="card overflow-hidden">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Members</th>
+          <th>Repos</th>
+          <th class="text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @teams.each do |team| %>
+          <tr>
+            <td class="font-medium">
+              <%= link_to team.name, team, class: "text-slate-900 hover:underline" %>
+              <% if team.description.present? %>
+                <p class="mt-0.5 text-xs font-normal text-slate-500 line-clamp-1"><%= team.description %></p>
+              <% end %>
+            </td>
+            <td><span class="badge badge-slate"><%= team.team_members.size %></span></td>
+            <td><span class="badge badge-slate"><%= team.repositories.size %></span></td>
+            <td class="text-right">
+              <%= link_to "Edit", edit_team_path(team), class: "text-sm font-medium text-slate-600 hover:text-slate-900" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <div class="card border-dashed p-12 text-center">
+    <p class="text-base font-medium text-slate-900">No teams yet</p>
+    <p class="mt-1 text-sm text-slate-500">Create a team, add members with GitHub usernames, then link repositories.</p>
+    <div class="mt-6">
+      <%= link_to "Create the first team", new_team_path, class: button_classes(:primary) %>
+    </div>
+  </div>
+<% end %>

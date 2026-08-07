@@ -1,0 +1,119 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        run: |
+          curl -sSL "https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz" \
+            | tar -xz -C /tmp gitleaks
+          sudo install /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Run gitleaks
+        run: gitleaks detect --source . --verbose --redact
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres_test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start PostgreSQL
+        run: |
+          docker run -d \
+            --name postgres \
+            -e POSTGRES_PASSWORD=postgres \
+            -p 5432:5432 \
+            postgres:16
+          until docker exec postgres pg_isready -U postgres; do sleep 1; done
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.9'
+          bundler-cache: true
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "22" }
+
+      # libvips is required by ruby-vips / Active Storage (:vips processor)
+      - name: Install system packages
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libvips42
+
+      - name: Configure bundler
+        run: bundle config set --local without 'production'
+
+      - name: Install deps
+        run: |
+          bundle install
+          (test -f yarn.lock && yarn install --frozen-lockfile) || true
+
+      - name: DB prepare
+        run: |
+          bin/rails db:create db:schema:load
+          bin/rails db:migrate || true
+          # Parallel test DBs (numbered 2–4 for parallel_tests)
+          for i in 2 3 4; do
+            PGPASSWORD=postgres psql -h localhost -U postgres -c "CREATE DATABASE postgres_test${i};" || true
+            DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres_test${i}" bin/rails db:schema:load
+            DATABASE_URL="postgres://postgres:postgres@localhost:5432/postgres_test${i}" bin/rails db:migrate || true
+          done
+
+      # Layout links tailwind.css (app/assets/builds). Rebuild in CI and fail if missing.
+      - name: Build Tailwind CSS
+        run: |
+          bin/rails tailwindcss:build
+          test -s app/assets/builds/tailwind.css
+          ls -la app/assets/builds/
+
+      - name: RuboCop Linting
+        run: bundle exec rubocop --format progress
+
+      - name: Brakeman Security Scan
+        run: bundle exec brakeman --no-pager --no-summary --confidence-level=2
+
+      - name: Bundler Audit
+        run: bin/bundler-audit
+
+      # Run non-system tests in parallel for speed
+      - name: Run Non-System Tests in Parallel
+        run: |
+          if [ -d spec ] && ls spec/**/*_spec.rb >/dev/null 2>&1; then
+            bundle exec parallel_rspec -n 4 \
+              -o '--format progress' \
+              --exclude-pattern 'spec/system/' \
+              spec/ || bundle exec rspec --exclude-pattern 'spec/system/**/*_spec.rb'
+          else
+            echo "No specs yet — skipping"
+          fi
+
+      # Run system tests sequentially to avoid Chrome/Selenium conflicts
+      - name: Run System Tests Sequentially
+        run: |
+          if [ -d spec/system ] && ls spec/system/**/*_spec.rb >/dev/null 2>&1; then
+            NO_COVERAGE=1 bundle exec rspec spec/system/ --format progress
+          else
+            echo "No system specs yet — skipping"
+          fi
+
+      - name: Check Coverage
+        if: hashFiles('coverage/.last_run.json') != ''
+        run: bin/check-coverage
+        continue-on-error: true

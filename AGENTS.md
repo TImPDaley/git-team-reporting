@@ -33,7 +33,7 @@ These rules apply to every coding agent working in this repository.
 - Before using `gh`, run `unset GITHUB_TOKEN GH_TOKEN`.
 - Merges are squash-only. Do not rebase shared branches or force-push (including the default branch) without explicit confirmation.
 - Link issues with `Refs #N` unless the user wants the issue closed, in which case `Fixes #N` is allowed. Never use closing keywords on tracking issues that must stay open.
-- Open a PR and wait for CI to go green. Then ask the **CODE REVIEW** bot to review. Do not request GitHub Copilot as a reviewer, and do not treat Copilot review comments as a required step.
+- Open a PR and wait for CI to go green. The **CODE REVIEW** bot reviews new PRs automatically; address its comments, then Tim reviews. Do not request GitHub Copilot as a reviewer, and do not treat Copilot review comments as a required step.
 - Do not merge until Tim explicitly says to merge.
 - After merge, there is no production deploy. This is a local-only app. Report that no deploy ran.
 
@@ -43,9 +43,10 @@ Before suggesting a commit or claiming work is done:
 
 ```bash
 bin/ci
+bin/check-coverage
 ```
 
-`bin/ci` is what GitHub Actions exercises (setup, RuboCop, Brakeman, bundler-audit, RSpec). You can also run `bin/test-parallel` and `bin/check-coverage` locally.
+`bin/ci` (`config/ci.rb`) runs setup, the Tailwind build, RuboCop, bundler-audit, importmap audit, Brakeman (`--confidence-level=2 --exit-on-warn --exit-on-error`, matching the CI test job), and `bin/test-parallel`. CI also runs **Secret scan (gitleaks)** (not in `bin/ci`) and `bin/check-coverage` after tests.
 
 CI jobs on each PR: **Secret scan (gitleaks)** and **test**. Both must be green.
 

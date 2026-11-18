@@ -2,6 +2,8 @@
 
 Thanks for your interest in Git Team Reporting.
 
+Agents working in this repository must follow [AGENTS.md](AGENTS.md).
+
 ## Development setup
 
 **Recommended:** open the repo in VS Code / Cursor and **Reopen in Container** (Dev Containers). Then:

@@ -72,7 +72,7 @@ RUN RUBY_CONFIGURE_OPTS="--with-openssl-dir=/usr" rbenv install "$RUBY_VERSION" 
   && gem install bundler --no-document
 
 # Install Rails (pin to latest stable)
-ARG RAILS_VERSION=8.1.3
+ARG RAILS_VERSION=8.1.4
 RUN gem install rails -v "$RAILS_VERSION" --no-document \
   && rbenv rehash
 

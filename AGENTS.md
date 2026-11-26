@@ -46,7 +46,7 @@ bin/ci
 bin/check-coverage
 ```
 
-`bin/ci` (`config/ci.rb`) runs setup, the Tailwind build, RuboCop, bundler-audit, importmap audit, Brakeman (`--confidence-level=2 --exit-on-warn --exit-on-error`, matching the CI test job), and `bin/test-parallel`. CI also runs **Secret scan (gitleaks)** (not in `bin/ci`) and `bin/check-coverage` after tests.
+`bin/ci` (`config/ci.rb`) runs setup, the Tailwind build, RuboCop, bundler-audit, importmap audit, Brakeman (`--confidence-level=2 --exit-on-warn --exit-on-error`), and `bin/test-parallel`. The CI **test** job runs RuboCop, Brakeman (`--confidence-level=2`), bundler-audit, parallel non-system specs, system specs, and `bin/check-coverage`; it does not run the importmap audit. CI also runs **Secret scan (gitleaks)**, which `bin/ci` does not, so run `bin/check-coverage` locally too.
 
 CI jobs on each PR: **Secret scan (gitleaks)** and **test**. Both must be green.
 

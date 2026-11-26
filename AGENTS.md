@@ -33,7 +33,7 @@ These rules apply to every coding agent working in this repository.
 - Before using `gh`, run `unset GITHUB_TOKEN GH_TOKEN`.
 - Merges are squash-only. Do not rebase shared branches or force-push (including the default branch) without explicit confirmation.
 - Link issues with `Refs #N` unless the user wants the issue closed, in which case `Fixes #N` is allowed. Never use closing keywords on tracking issues that must stay open.
-- Open a PR and wait for CI to go green. The **CODE REVIEW** bot reviews new PRs automatically; address its comments, then Tim reviews. Do not request GitHub Copilot as a reviewer, and do not treat Copilot review comments as a required step.
+- Open a PR and wait for CI to go green. The **CODE REVIEW** bot reviews a PR only when Tim or his Chief of Staff asks; address its comments, then Tim reviews. Do not request GitHub Copilot as a reviewer, and do not treat Copilot review comments as a required step.
 - Do not merge until Tim explicitly says to merge.
 - After merge, there is no production deploy. This is a local-only app. Report that no deploy ran.
 
